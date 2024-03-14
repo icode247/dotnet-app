@@ -1,45 +1,32 @@
-// using Microsoft.AspNetCore.SignalR;
-// using System.Threading.Tasks;
-
-// var builder = WebApplication.CreateBuilder(args);
-
-// // Add services to the container.
-// builder.Services.AddSignalR();
-
-// var app = builder.Build();
-
-// app.MapGet("/", () => "Hello World!");
-// app.MapHub<ChatHub>("/chatHub/negotiate");
-
-// app.Run();
-
-// public class ChatHub : Hub
-// {
-//     public async Task SendMessage(string messageType, string message)
-//     {
-//         await Clients.All.SendAsync("NewIncomingMessage", messageType, message);
-//     }
-// }
-using SignalRWebpack.Hubs;
+using SignalRApp.Hubs;
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:3000") // Replace with your client's origin
+        policy.WithOrigins("http://localhost:3000")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
     });
 });
 
+// Add SignalR services
 builder.Services.AddSignalR();
 
 var app = builder.Build();
+
+// Use CORS with the specified policy
 app.UseCors("CorsPolicy");
+
+// Use default files and static files
 app.UseDefaultFiles();
 app.UseStaticFiles();
-app.MapHub<ChatHub>("/hub");
-// app.MapGet("/", () => "Hello World!");
 
+// Map the MessagingHub to the "/hub" endpoint
+app.MapHub<MessagingHub>("/hub");
+
+// Run the application
 app.Run();

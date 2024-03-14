@@ -27,3 +27,4 @@
 /Users/ekekentaodionyenfe/Downloads/SignalRServer/obj/Debug/net8.0/SignalRServer.pdb
 /Users/ekekentaodionyenfe/Downloads/SignalRServer/obj/Debug/net8.0/SignalRServer.genruntimeconfig.cache
 /Users/ekekentaodionyenfe/Downloads/SignalRServer/obj/Debug/net8.0/ref/SignalRServer.dll
+/Users/ekekentaodionyenfe/Downloads/SignalRServer/obj/Debug/net8.0/SignalRServer.sourcelink.json

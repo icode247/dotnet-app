@@ -1,37 +1,46 @@
 using Microsoft.AspNetCore.SignalR;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using Microsoft.Extensions.Logging; // Required for logging
 
-namespace SignalRWebpack.Hubs
+namespace SignalRApp.Hubs
 {
-    public class ChatMessage
+    public class UserMessage
     {
-        public required string Username { get; set; }
-        public required string Message { get; set; }
-        public DateTime Timestamp { get; set; }
+        public required string Sender { get; set; }
+        public required string Content { get; set; }
+        public DateTime SentTime { get; set; }
     }
 
-    public class ChatHub : Hub
+    public class MessagingHub : Hub
     {
-        private static readonly List<ChatMessage> Messages = new List<ChatMessage>();
+        private static readonly List<UserMessage> MessageHistory = new List<UserMessage>();
+        private readonly ILogger<MessagingHub> _logger; // Logger instance
 
-        public async Task NewMessage(string message)
+        // Constructor to inject the logger
+        public MessagingHub(ILogger<MessagingHub> logger)
         {
-            var username = Context.ConnectionId; // Correctly accessing Context within the Hub class
-            var chatMessage = new ChatMessage
-            {
-                Username = username,
-                Message = message,
-                Timestamp = DateTime.UtcNow
-            };
-
-            Messages.Add(chatMessage); // Store message in memory
-            // await Clients.All.SendAsync("messageReceived", username, message, chatMessage.Timestamp);
-                await Clients.Others.SendAsync("messageReceived", username, message, chatMessage.Timestamp);
-
+            _logger = logger;
+             _logger.LogInformation($"Message from");
         }
 
-        public async Task GetAllMessages() => 
-            await Clients.Caller.SendAsync("allMessages", Messages);
+        public async Task PostMessage(string content)
+        {
+            var senderId = Context.ConnectionId;
+            var userMessage = new UserMessage
+            {
+                Sender = senderId,
+                Content = content,
+                SentTime = DateTime.UtcNow
+            };
+
+            MessageHistory.Add(userMessage);
+            _logger.LogInformation($"Message from {senderId}: {content}"); // Log message sending
+            await Clients.Others.SendAsync("ReceiveMessage", senderId, content, userMessage.SentTime);
+        }
+
+        public async Task RetrieveMessageHistory()
+        {
+            _logger.LogInformation("Retrieving message history"); // Log message history retrieval
+            await Clients.Caller.SendAsync("MessageHistory", MessageHistory);
+        }
     }
 }
